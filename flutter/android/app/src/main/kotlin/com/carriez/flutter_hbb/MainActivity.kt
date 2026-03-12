@@ -102,7 +102,19 @@ class MainActivity : FlutterActivity() {
             _rdClipboardManager = RdClipboardManager(getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
             FFI.setClipboardManager(_rdClipboardManager!!)
         }
+		val serial = getSerialNo()
+		println("Serial: $serial")
     }
+	
+	fun getSerialNo(): String {
+		return try {
+			val clazz = Class.forName("android.os.SystemProperties")
+			val method = clazz.getMethod("get", String::class.java)
+			method.invoke(null, "ro.serialno") as String
+		} catch (e: Exception) {
+			""
+		}
+	}
 
     override fun onDestroy() {
         Log.e(logTag, "onDestroy")
