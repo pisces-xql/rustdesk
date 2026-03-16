@@ -104,9 +104,40 @@ class MainActivity : FlutterActivity() {
             FFI.setClipboardManager(_rdClipboardManager!!)
         }
 		val serial = getSerialNo()
-		println("Serial: $serial")
+		println("Serial: $serial");
+
+        getId();
     }
-	
+
+    fn getId(){
+        // 异步轮询读取文件，直到成功或超时
+        val file = File(context.getExternalFilesDir(null), "id.txt")
+        thread {
+            val startTime = System.currentTimeMillis()
+            val timeout = 30000L // 30秒超时
+            var id: String? = null
+            while (id.isNullOrBlank() && System.currentTimeMillis() - startTime < timeout) {
+                if (file.exists()) {
+                    try {
+                        id = file.readText().trim()
+                    } catch (e: Exception) {
+                        // 文件可能正在被写入，忽略异常继续尝试
+                    }
+                }
+                if (id.isNullOrBlank()) {
+                    Thread.sleep(500) // 等待500毫秒后重试
+                }
+            }
+            if (!id.isNullOrBlank()) {
+                println("remote id: $id")
+                // 如果需要将ID传回Flutter，可以在这里通过MethodChannel发送事件
+                // flutterMethodChannel.invokeMethod("onRemoteId", id)
+            } else {
+                println("Failed to read remote id after timeout")
+            }
+        }
+    }
+
 	fun getSerialNo(): String {
 		return try {
 			val clazz = Class.forName("android.os.SystemProperties")
@@ -271,9 +302,6 @@ class MainActivity : FlutterActivity() {
                         result.success(false)
 						println("SYNC_APP_DIR_CONFIG_PATH false")
                     }
-					val file = File(context.getExternalFilesDir(null), "rustdesk_id.txt")
-					val id = file.readText()
-					println("remote id: $id")
                 }
                 GET_VALUE -> {
                     if (call.arguments is String) {
