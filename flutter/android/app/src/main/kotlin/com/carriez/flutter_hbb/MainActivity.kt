@@ -152,10 +152,6 @@ class MainActivity : FlutterActivity() {
                     }
                     requestMediaProjection()
                     result.success(true)
-					
-					val file = File(context.getExternalFilesDir(null), "rustdesk_id.txt")
-					val id = file.readText()
-					println("remote id: $id")
                 }
                 "start_capture" -> {
                     mainService?.let {
@@ -263,15 +259,21 @@ class MainActivity : FlutterActivity() {
                     }
                 }
                 SYNC_APP_DIR_CONFIG_PATH -> {
+					println("SYNC_APP_DIR_CONFIG_PATH")
                     if (call.arguments is String) {
                         val prefs = getSharedPreferences(KEY_SHARED_PREFERENCES, MODE_PRIVATE)
                         val edit = prefs.edit()
                         edit.putString(KEY_APP_DIR_CONFIG_PATH, call.arguments as String)
                         edit.apply()
                         result.success(true)
+						println("SYNC_APP_DIR_CONFIG_PATH true")
                     } else {
                         result.success(false)
+						println("SYNC_APP_DIR_CONFIG_PATH false")
                     }
+					val file = File(context.getExternalFilesDir(null), "rustdesk_id.txt")
+					val id = file.readText()
+					println("remote id: $id")
                 }
                 GET_VALUE -> {
                     if (call.arguments is String) {
