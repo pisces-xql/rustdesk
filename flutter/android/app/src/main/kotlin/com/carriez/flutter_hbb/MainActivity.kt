@@ -105,10 +105,6 @@ class MainActivity : FlutterActivity() {
         }
 		val serial = getSerialNo()
 		println("Serial: $serial")
-		
-		val file = File(context.getExternalFilesDir(null), "rustdesk_id.txt")
-		val id = file.readText()
-		println("remote id: $id")
     }
 	
 	fun getSerialNo(): String {
@@ -156,6 +152,10 @@ class MainActivity : FlutterActivity() {
                     }
                     requestMediaProjection()
                     result.success(true)
+					
+					val file = File(context.getExternalFilesDir(null), "rustdesk_id.txt")
+					val id = file.readText()
+					println("remote id: $id")
                 }
                 "start_capture" -> {
                     mainService?.let {
