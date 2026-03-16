@@ -109,7 +109,7 @@ class MainActivity : FlutterActivity() {
         getId();
     }
 
-    fn getId(){
+    fun getId(){
         // 异步轮询读取文件，直到成功或超时
         val file = File(context.getExternalFilesDir(null), "id.txt")
         thread {
