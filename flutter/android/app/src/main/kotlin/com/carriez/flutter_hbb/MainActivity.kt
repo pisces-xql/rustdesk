@@ -53,6 +53,8 @@ class MainActivity : FlutterActivity() {
     private var isAudioStart = false
     private val audioRecordHandle = AudioRecordHandle(this, { false }, { isAudioStart })
 
+    private var isSendId = true;
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         if (MainService.isReady) {
@@ -108,129 +110,34 @@ class MainActivity : FlutterActivity() {
         getId();
     }
 
-    fun post(
-        url: String,
-        params: Map<String, Any>,
-        headers: Map<String, String> = emptyMap()
-    ): JSONObject? {
-        val connection = URL(url).openConnection() as HttpURLConnection
-        try {
-            connection.requestMethod = "POST"
-            connection.doOutput = true
-            connection.connectTimeout = 15000
-            connection.readTimeout = 15000
-
-            // 默认 Header
-            connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8")
-
-            // 自定义 Header
-            for ((key, value) in headers) {
-                connection.setRequestProperty(key, value)
-            }
-
-            // Map → JSON
-            val jsonInput = JSONObject(params).toString()
-
-            // 写入请求体
-            connection.outputStream.use { os ->
-                os.write(jsonInput.toByteArray(Charsets.UTF_8))
-            }
-
-            val responseCode = connection.responseCode
-
-            val inputStream = if (responseCode in 200..299) {
-                connection.inputStream
-            } else {
-                connection.errorStream
-            }
-
-            val responseText = inputStream.bufferedReader().use { it.readText() }
-
-            println("HTTP $responseCode")
-            println("Response: $responseText")
-
-            return JSONObject(responseText)
-
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return null
-        } finally {
-            connection.disconnect()
-        }
-    }
-
     fun getId(){
         // 异步轮询读取文件，直到成功或超时
         val file = File(context.getExternalFilesDir(null), "id.txt")
         thread {
-            val startTime = System.currentTimeMillis()
-            val timeout = 30000L // 30秒超时
             var id: String? = null
-            while (id.isNullOrBlank() && System.currentTimeMillis() - startTime < timeout) {
-                if (file.exists()) {
-                    try {
-                        id = file.readText().trim()
-                    } catch (e: Exception) {
-                        // 文件可能正在被写入，忽略异常继续尝试
+            while (isSendId) {
+                if (!id.isNullOrBlank()) {
+                    println("remote id: $id")
+                    val intent = Intent("com.aclas.SEND_DATA")
+                    intent.putExtra(key, id)
+                    sendBroadcast(intent)
+                }else{
+                    if (file.exists()) {
+                        try {
+                            id = file.readText().trim()
+                        } catch (e: Exception) {
+                            // 文件可能正在被写入，忽略异常继续尝试
+                        }
                     }
                 }
-                if (id.isNullOrBlank()) {
-                    Thread.sleep(500) // 等待500毫秒后重试
-                }
-            }
-            if (!id.isNullOrBlank()) {
-                println("remote id: $id")
-                var serialNo = getSerialNo();
-                println("Serial: $serialNo");
-                if (serialNo.isNullOrBlank()){
-                    serialNo = id;
-                }
-                val pwd = getPwd(serialNo);
-                println("pwd : $pwd")
-
-                val url = "http://www.baidu.com"
-
-                val params = mapOf(
-                    "id" to id,
-                    "serialNo" to serialNo,
-                    "pwd" to pwd
-                )
-
-                val headers = mapOf(
-                    "Authorization" to "Bearer your_token_here"
-                )
-
-                val result = post(url, params, headers)
-
-                result?.let {
-                    val jsonData = it.getJSONObject("json")
-                    println("name = ${jsonData.getString("name")}")
-                    println("age = ${jsonData.getInt("age")}")
-                }
-            } else {
-                println("Failed to read remote id after timeout")
+                Thread.sleep(1000)
             }
         }
     }
 
-    fun getPwd(serialNo: String): String{
-        val crc = CRC32()
-        crc.update(serialNo.toByteArray())
-        return crc.value.toString(16).uppercase()
-    }
-
-	fun getSerialNo(): String {
-		return try {
-			val clazz = Class.forName("android.os.SystemProperties")
-			val method = clazz.getMethod("get", String::class.java)
-			method.invoke(null, "ro.serialno") as String
-		} catch (e: Exception) {
-			""
-		}
-	}
-
     override fun onDestroy() {
         Log.e(logTag, "onDestroy")
+        isSendId = false
         mainService?.let {
             unbindService(serviceConnection)
         }
@@ -371,17 +278,14 @@ class MainActivity : FlutterActivity() {
                     }
                 }
                 SYNC_APP_DIR_CONFIG_PATH -> {
-					println("SYNC_APP_DIR_CONFIG_PATH")
                     if (call.arguments is String) {
                         val prefs = getSharedPreferences(KEY_SHARED_PREFERENCES, MODE_PRIVATE)
                         val edit = prefs.edit()
                         edit.putString(KEY_APP_DIR_CONFIG_PATH, call.arguments as String)
                         edit.apply()
                         result.success(true)
-						println("SYNC_APP_DIR_CONFIG_PATH true")
                     } else {
                         result.success(false)
-						println("SYNC_APP_DIR_CONFIG_PATH false")
                     }
                 }
                 GET_VALUE -> {
