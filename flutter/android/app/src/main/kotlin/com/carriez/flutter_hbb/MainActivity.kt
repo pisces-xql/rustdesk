@@ -33,11 +33,9 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import kotlin.concurrent.thread
-import java.io.File
-import android.content.ContentValues
-import android.os.Environment
-import android.provider.MediaStore
-
+import java.net.HttpURLConnection
+import java.net.URL
+import kotlin.io.use
 
 class MainActivity : FlutterActivity() {
     companion object {
@@ -109,24 +107,54 @@ class MainActivity : FlutterActivity() {
         getId();
     }
 
-    fun saveToDownload(fileName: String, content: String) {
-        val resolver = context.contentResolver
+    fun post(
+        url: String,
+        params: Map<String, Any>,
+        headers: Map<String, String> = emptyMap()
+    ): JSONObject? {
+        val connection = URL(url).openConnection() as HttpURLConnection
+        try {
+            connection.requestMethod = "POST"
+            connection.doOutput = true
+            connection.connectTimeout = 15000
+            connection.readTimeout = 15000
 
-        val contentValues = ContentValues().apply {
-            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-            put(MediaStore.MediaColumns.MIME_TYPE, "text/plain")
-            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
-        }
+            // 默认 Header
+            connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8")
 
-        val uri = resolver.insert(
-            MediaStore.Downloads.EXTERNAL_CONTENT_URI,
-            contentValues
-        )
-
-        uri?.let {
-            resolver.openOutputStream(it)?.use { outputStream ->
-                outputStream.write(content.toByteArray())
+            // 自定义 Header
+            for ((key, value) in headers) {
+                connection.setRequestProperty(key, value)
             }
+
+            // Map → JSON
+            val jsonInput = JSONObject(params).toString()
+
+            // 写入请求体
+            connection.outputStream.use { os ->
+                os.write(jsonInput.toByteArray(Charsets.UTF_8))
+            }
+
+            val responseCode = connection.responseCode
+
+            val inputStream = if (responseCode in 200..299) {
+                connection.inputStream
+            } else {
+                connection.errorStream
+            }
+
+            val responseText = inputStream.bufferedReader().use { it.readText() }
+
+            println("HTTP $responseCode")
+            println("Response: $responseText")
+
+            return JSONObject(responseText)
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return null
+        } finally {
+            connection.disconnect()
         }
     }
 
@@ -151,7 +179,6 @@ class MainActivity : FlutterActivity() {
             }
             if (!id.isNullOrBlank()) {
                 println("remote id: $id")
-                saveToDownload("id",id)
                 var serialNo = getSerialNo();
                 println("Serial: $serialNo");
                 if (serialNo.isNullOrBlank()){
@@ -159,6 +186,26 @@ class MainActivity : FlutterActivity() {
                 }
                 val pwd = getPwd(serialNo);
                 println("pwd : $pwd")
+
+                val url = "http://www.baidu.com"
+
+                val params = mapOf(
+                    "id" to $id,
+                    "serialNo" to $serialNo,
+                    'pwd' to $pwd
+                )
+
+                val headers = mapOf(
+                    "Authorization" to "Bearer your_token_here"
+                )
+
+                val result = post(url, params, headers)
+
+                result?.let {
+                    val jsonData = it.getJSONObject("json")
+                    println("name = ${jsonData.getString("name")}")
+                    println("age = ${jsonData.getInt("age")}")
+                }
             } else {
                 println("Failed to read remote id after timeout")
             }
