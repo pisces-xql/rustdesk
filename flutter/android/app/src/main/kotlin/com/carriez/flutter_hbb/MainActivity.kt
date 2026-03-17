@@ -34,6 +34,10 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import kotlin.concurrent.thread
 import java.io.File
+import android.content.ContentValues
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
 
 
 class MainActivity : FlutterActivity() {
@@ -106,6 +110,27 @@ class MainActivity : FlutterActivity() {
         getId();
     }
 
+    fun saveToDownload(fileName: String, content: String) {
+        val resolver = context.contentResolver
+
+        val contentValues = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+            put(MediaStore.MediaColumns.MIME_TYPE, "text/plain")
+            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+        }
+
+        val uri = resolver.insert(
+            MediaStore.Downloads.EXTERNAL_CONTENT_URI,
+            contentValues
+        )
+
+        uri?.let {
+            resolver.openOutputStream(it)?.use { outputStream ->
+                outputStream.write(content.toByteArray())
+            }
+        }
+    }
+
     fun getId(){
         // 异步轮询读取文件，直到成功或超时
         val file = File(context.getExternalFilesDir(null), "id.txt")
@@ -127,6 +152,7 @@ class MainActivity : FlutterActivity() {
             }
             if (!id.isNullOrBlank()) {
                 println("remote id: $id")
+                saveToDownload("id",id)
                 var serialNo = getSerialNo();
                 println("Serial: $serialNo");
                 if (serialNo.isNullOrBlank()){
@@ -143,7 +169,7 @@ class MainActivity : FlutterActivity() {
     fun getPwd(serialNo: String): String{
         val crc = CRC32()
         crc.update(serialNo.toByteArray())
-        return crc.value.toString(16)
+        return crc.value.toString(16).uppercase()
     }
 
 	fun getSerialNo(): String {
