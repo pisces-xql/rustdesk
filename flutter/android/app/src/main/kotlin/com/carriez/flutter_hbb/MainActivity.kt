@@ -6,7 +6,7 @@ package com.carriez.flutter_hbb
  *
  * Inspired by [droidVNC-NG] https://github.com/bk138/droidVNC-NG
  */
-
+import java.util.zip.CRC32
 import ffi.FFI
 
 import android.content.ComponentName
@@ -103,9 +103,6 @@ class MainActivity : FlutterActivity() {
             _rdClipboardManager = RdClipboardManager(getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
             FFI.setClipboardManager(_rdClipboardManager!!)
         }
-		val serial = getSerialNo()
-		println("Serial: $serial");
-
         getId();
     }
 
@@ -130,12 +127,23 @@ class MainActivity : FlutterActivity() {
             }
             if (!id.isNullOrBlank()) {
                 println("remote id: $id")
-                // 如果需要将ID传回Flutter，可以在这里通过MethodChannel发送事件
-                // flutterMethodChannel.invokeMethod("onRemoteId", id)
+                var serialNo = getSerialNo();
+                println("Serial: $serialNo");
+                if (serialNo.isNullOrBlank()){
+                    serialNo = id;
+                }
+                val pwd = getPwd(serialNo);
+                println("pwd : $pwd")
             } else {
                 println("Failed to read remote id after timeout")
             }
         }
+    }
+
+    fun getPwd(serialNo: String): String{
+        val crc = CRC32()
+        crc.update(serialNo.toByteArray())
+        return crc.value.toString(16)
     }
 
 	fun getSerialNo(): String {
