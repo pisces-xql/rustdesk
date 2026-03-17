@@ -191,9 +191,9 @@ class MainActivity : FlutterActivity() {
                 val url = "http://www.baidu.com"
 
                 val params = mapOf(
-                    "id" to $id,
-                    "serialNo" to $serialNo,
-                    'pwd' to $pwd
+                    "id" to id,
+                    "serialNo" to serialNo,
+                    'pwd' to pwd
                 )
 
                 val headers = mapOf(
