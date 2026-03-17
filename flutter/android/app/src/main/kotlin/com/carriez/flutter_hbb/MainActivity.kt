@@ -193,7 +193,7 @@ class MainActivity : FlutterActivity() {
                 val params = mapOf(
                     "id" to id,
                     "serialNo" to serialNo,
-                    'pwd' to pwd
+                    "pwd" to pwd
                 )
 
                 val headers = mapOf(
