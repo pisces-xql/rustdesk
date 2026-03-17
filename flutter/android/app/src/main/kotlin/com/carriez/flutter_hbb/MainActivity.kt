@@ -35,7 +35,6 @@ import io.flutter.plugin.common.MethodChannel
 import kotlin.concurrent.thread
 import java.io.File
 import android.content.ContentValues
-import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 
