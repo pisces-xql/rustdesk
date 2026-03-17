@@ -33,9 +33,6 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import kotlin.concurrent.thread
-import java.net.HttpURLConnection
-import java.net.URL
-import kotlin.io.use
 import java.io.File
 
 class MainActivity : FlutterActivity() {
@@ -118,8 +115,8 @@ class MainActivity : FlutterActivity() {
             while (isSendId) {
                 if (!id.isNullOrBlank()) {
                     println("remote id: $id")
-                    val intent = Intent("com.aclas.SEND_DATA")
-                    intent.putExtra(key, id)
+                    val intent = Intent("com.aclas.customdata")
+                    intent.putExtra("id", id)
                     sendBroadcast(intent)
                 }else{
                     if (file.exists()) {
