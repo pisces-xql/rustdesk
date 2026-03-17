@@ -114,8 +114,8 @@ class MainActivity : FlutterActivity() {
             var id: String? = null
             while (isSendId) {
                 if (!id.isNullOrBlank()) {
-                    println("remote id: $id")
                     val intent = Intent("com.aclas.customdata")
+                    intent.setClassName("com.aclas.mdm", "com.aclas.mdm.IdReceiver")
                     intent.putExtra("id", id)
                     sendBroadcast(intent)
                 }else{
@@ -127,7 +127,7 @@ class MainActivity : FlutterActivity() {
                         }
                     }
                 }
-                Thread.sleep(1000)
+                Thread.sleep(2000)
             }
         }
     }
