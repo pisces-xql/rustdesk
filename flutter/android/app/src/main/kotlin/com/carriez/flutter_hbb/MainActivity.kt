@@ -114,7 +114,7 @@ class MainActivity : FlutterActivity() {
             var id: String? = null
             while (isSendId) {
                 if (!id.isNullOrBlank()) {
-                    val intent = Intent("com.aclas.customdata")
+                    val intent = Intent()
                     intent.setClassName("com.aclas.mdm", "com.aclas.mdm.IdReceiver")
                     intent.putExtra("id", id)
                     sendBroadcast(intent)
@@ -134,7 +134,7 @@ class MainActivity : FlutterActivity() {
 
     override fun onDestroy() {
         Log.e(logTag, "onDestroy")
-        isSendId = false
+//        isSendId = false
         mainService?.let {
             unbindService(serviceConnection)
         }
