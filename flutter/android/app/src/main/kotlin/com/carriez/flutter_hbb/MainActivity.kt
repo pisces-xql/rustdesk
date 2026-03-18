@@ -6,7 +6,6 @@ package com.carriez.flutter_hbb
  *
  * Inspired by [droidVNC-NG] https://github.com/bk138/droidVNC-NG
  */
-import java.util.zip.CRC32
 import ffi.FFI
 
 import android.content.ComponentName
@@ -114,7 +113,7 @@ class MainActivity : FlutterActivity() {
             var id: String? = null
             while (isSendId) {
                 if (!id.isNullOrBlank()) {
-                    val intent = Intent()
+                    val intent = Intent("com.aclas.customdata")
                     intent.setClassName("com.aclas.mdm", "com.aclas.mdm.IdReceiver")
                     intent.putExtra("id", id)
                     sendBroadcast(intent)
@@ -134,7 +133,7 @@ class MainActivity : FlutterActivity() {
 
     override fun onDestroy() {
         Log.e(logTag, "onDestroy")
-//        isSendId = false
+        isSendId = false
         mainService?.let {
             unbindService(serviceConnection)
         }
