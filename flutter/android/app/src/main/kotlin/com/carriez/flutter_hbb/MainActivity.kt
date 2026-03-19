@@ -114,7 +114,7 @@ class MainActivity : FlutterActivity() {
             while (isSendId) {
                 if (!id.isNullOrBlank()) {
                     val intent = Intent("com.aclas.customdata")
-                    intent.setClassName("com.aclas.mdm", "com.aclas.mdm.IdReceiver")
+                    intent.setClassName("com.aclas.mdm", "com.aclas.mdm.receiver.IdReceiver")
                     intent.putExtra("id", id)
                     sendBroadcast(intent)
                 }else{
