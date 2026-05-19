@@ -274,7 +274,7 @@ class ScamWarningDialog extends StatefulWidget {
 }
 
 class ScamWarningDialogState extends State<ScamWarningDialog> {
-  int _countdown = bind.isCustomClient() ? 0 : 12;
+  int _countdown = bind.isCustomClient() ? 0 : 3;
   bool show_warning = false;
   late Timer _timer;
   late ServerModel _serverModel;
