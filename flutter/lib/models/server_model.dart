@@ -376,16 +376,16 @@ class ServerModel with ChangeNotifier {
 
   Future<bool> checkFloatingWindowPermission() async {
     debugPrint("androidVersion $androidVersion");
-    if (androidVersion < 23) {
-      return false;
-    }
-    if (await AndroidPermissionManager.check(kSystemAlertWindow)) {
-      debugPrint("alert window permission already granted");
-      return true;
-    }
-    var res = await AndroidPermissionManager.request(kSystemAlertWindow);
-    debugPrint("alert window permission request result: $res");
-    return res;
+    // if (androidVersion < 23) {
+    //   return false;
+    // }
+    // if (await AndroidPermissionManager.check(kSystemAlertWindow)) {
+    //   debugPrint("alert window permission already granted");
+    //   return true;
+    // }
+    // var res = await AndroidPermissionManager.request(kSystemAlertWindow);
+    // debugPrint("alert window permission request result: $res");
+    return true;
   }
 
   /// Toggle the screen sharing service.
@@ -786,9 +786,9 @@ class ServerModel with ChangeNotifier {
 
   void androidUpdatekeepScreenOn() async {
     if (!isAndroid) return;
-    var floatingWindowDisabled =
-        bind.mainGetLocalOption(key: kOptionDisableFloatingWindow) == "Y" ||
-            !await AndroidPermissionManager.check(kSystemAlertWindow);
+    var floatingWindowDisabled = true;
+        // bind.mainGetLocalOption(key: kOptionDisableFloatingWindow) == "Y" ||
+        //     !await AndroidPermissionManager.check(kSystemAlertWindow);
     final keepScreenOn = floatingWindowDisabled
         ? KeepScreenOn.never
         : optionToKeepScreenOn(

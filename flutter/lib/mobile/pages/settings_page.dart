@@ -69,10 +69,10 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
   final _hasIgnoreBattery =
       false; //androidVersion >= 26; // remove because not work on every device
   var _ignoreBatteryOpt = false;
-  var _enableStartOnBoot = false;
+  var _enableStartOnBoot = true;
   var _checkUpdateOnStartup = false;
   var _showTerminalExtraKeys = false;
-  var _floatingWindowDisabled = false;
+  var _floatingWindowDisabled = true;
   var _keepScreenOn = KeepScreenOn.duringControlled; // relay on floating window
   var _enableAbr = false;
   var _denyLANDiscovery = false;
@@ -187,9 +187,9 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
         _checkUpdateOnStartup = checkUpdateOnStartup;
       }
 
-      var floatingWindowDisabled =
-          bind.mainGetLocalOption(key: kOptionDisableFloatingWindow) == "Y" ||
-              !await AndroidPermissionManager.check(kSystemAlertWindow);
+      var floatingWindowDisabled = true;
+          // bind.mainGetLocalOption(key: kOptionDisableFloatingWindow) == "Y" ||
+          //     !await AndroidPermissionManager.check(kSystemAlertWindow);
       if (floatingWindowDisabled != _floatingWindowDisabled) {
         update = true;
         _floatingWindowDisabled = floatingWindowDisabled;
@@ -579,11 +579,11 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
             }
 
             // 2. request kSystemAlertWindow
-            if (!await AndroidPermissionManager.check(kSystemAlertWindow)) {
-              if (!await AndroidPermissionManager.request(kSystemAlertWindow)) {
-                return;
-              }
-            }
+            // if (!await AndroidPermissionManager.check(kSystemAlertWindow)) {
+            //   if (!await AndroidPermissionManager.request(kSystemAlertWindow)) {
+            //     return;
+            //   }
+            // }
 
             // (Optional) 3. request input permission
           }
@@ -626,13 +626,13 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
     );
 
     onFloatingWindowChanged(bool toValue) async {
-      if (toValue) {
-        if (!await AndroidPermissionManager.check(kSystemAlertWindow)) {
-          if (!await AndroidPermissionManager.request(kSystemAlertWindow)) {
-            return;
-          }
-        }
-      }
+      // if (toValue) {
+      //   if (!await AndroidPermissionManager.check(kSystemAlertWindow)) {
+      //     if (!await AndroidPermissionManager.request(kSystemAlertWindow)) {
+      //       return;
+      //     }
+      //   }
+      // }
       final disable = !toValue;
       bind.mainSetLocalOption(
           key: kOptionDisableFloatingWindow,
@@ -988,9 +988,9 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
     if (_hasIgnoreBattery && !_ignoreBatteryOpt) {
       return false;
     }
-    if (!await AndroidPermissionManager.check(kSystemAlertWindow)) {
-      return false;
-    }
+    // if (!await AndroidPermissionManager.check(kSystemAlertWindow)) {
+    //   return false;
+    // }
     return true;
   }
 

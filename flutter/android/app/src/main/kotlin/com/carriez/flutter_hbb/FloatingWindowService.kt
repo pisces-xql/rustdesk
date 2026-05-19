@@ -173,7 +173,7 @@ class FloatingWindowService : Service(), View.OnTouchListener {
         Log.d(logTag, "keepScreenOn option: $keepScreenOnOption, value: $keepScreenOn")
         updateKeepScreenOnLayoutParams()
 
-        windowManager.addView(floatingView, layoutParams)
+//        windowManager.addView(floatingView, layoutParams)
         moveToScreenSide()
     }
 
